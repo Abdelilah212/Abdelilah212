@@ -2,401 +2,241 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serpent TV - Télécommande</title>
+    <title>Serpent TV Simple</title>
     <style>
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
             background-color: #000;
             color: #fff;
-            font-family: 'Courier New', monospace;
+            font-family: Arial, sans-serif;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
         }
 
-        .game-container {
-            position: relative;
+        #gameArea {
             width: 100vw;
             height: 100vh;
+            position: relative;
         }
 
         #gameCanvas {
-            display: block;
             background-color: #000;
+            display: block;
         }
 
-        .overlay {
+        #startScreen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            background-color: rgba(0,0,0,0.9);
             display: flex;
-            justify-content: center;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            text-align: center;
             z-index: 100;
         }
 
-        .menu-screen {
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 40px;
+            z-index: 100;
         }
 
         .title {
-            font-size: 72px;
+            font-size: 60px;
             font-weight: bold;
-            margin-bottom: 40px;
-            text-shadow: 4px 4px 8px rgba(255,255,255,0.3);
-            letter-spacing: 8px;
+            margin-bottom: 30px;
         }
 
-        .subtitle {
-            font-size: 32px;
-            margin-bottom: 60px;
-            opacity: 0.8;
-        }
-
-        .instructions {
+        .instruction {
             font-size: 24px;
-            line-height: 1.8;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
-        .start-prompt {
-            font-size: 28px;
-            font-weight: bold;
+        .blink {
             animation: blink 1.5s infinite;
-            border: 3px solid #fff;
-            padding: 20px 40px;
-            background-color: rgba(255,255,255,0.1);
         }
 
         @keyframes blink {
             0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
+            51%, 100% { opacity: 0.5; }
         }
 
-        .hud {
+        #score {
             position: absolute;
-            top: 30px;
-            left: 30px;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            font-weight: bold;
             z-index: 50;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
         }
 
-        .score {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .level {
-            font-size: 24px;
-            opacity: 0.8;
-        }
-
-        .game-over-screen {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .game-over-title {
-            font-size: 64px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            color: #ff4444;
-            text-shadow: 4px 4px 8px rgba(255,68,68,0.5);
-        }
-
-        .final-score {
-            font-size: 32px;
-            margin-bottom: 40px;
-        }
-
-        .restart-prompt {
-            font-size: 24px;
-            font-weight: bold;
-            animation: pulse 2s infinite;
-            border: 3px solid #fff;
-            padding: 15px 30px;
-            background-color: rgba(255,255,255,0.1);
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .controls-help {
+        .controls {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            font-size: 18px;
-            opacity: 0.7;
-            text-align: right;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        }
-
-        .pause-overlay {
-            background-color: rgba(0, 0, 0, 0.9);
-        }
-
-        .pause-screen {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .pause-title {
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-
-        .visual-controls {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            z-index: 60;
-        }
-
-        .control-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            bottom: 20px;
+            left: 20px;
+            z-index: 50;
         }
 
         .control-btn {
-            width: 60px;
-            height: 60px;
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(255,255,255,0.2);
             border: 2px solid #fff;
             color: #fff;
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 20px;
+            padding: 15px;
+            margin: 5px;
             cursor: pointer;
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-            transition: all 0.2s ease;
-            font-family: 'Courier New', monospace;
+            width: 60px;
+            height: 60px;
         }
 
-        .control-btn:hover,
-        .control-btn:focus {
-            background-color: rgba(255, 255, 255, 0.4);
-            transform: scale(1.1);
-        }
-
-        .control-btn:active {
-            transform: scale(0.95);
-            background-color: rgba(255, 255, 255, 0.6);
-        }
-
-        .center-btn {
-            width: 80px;
-            font-size: 16px;
+        .control-row {
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div id="gameArea">
         <canvas id="gameCanvas"></canvas>
         
-        <!-- HUD pendant le jeu -->
-        <div id="gameHUD" class="hud" style="display: none;">
-            <div class="score">Score: <span id="score">0</span></div>
-            <div class="level">Niveau: <span id="level">1</span></div>
-        </div>
-
-        <!-- Aide contrôles -->
-        <div class="controls-help">
-            <div>🎮 Touches directionnelles pour diriger</div>
-            <div>⏯️ OK / Touche Rouge pour commencer</div>
-            <div>⏸️ RETURN pour pause</div>
-            <div>📱 Ou cliquez sur les boutons à l'écran</div>
-        </div>
-
-        <!-- Boutons de contrôle visuels (secours) -->
-        <div id="visualControls" class="visual-controls" style="display: none;">
-            <button class="control-btn" id="upBtn">↑</button>
-            <div class="control-row">
-                <button class="control-btn" id="leftBtn">←</button>
-                <button class="control-btn center-btn" id="okBtn">OK</button>
-                <button class="control-btn" id="rightBtn">→</button>
-            </div>
-            <button class="control-btn" id="downBtn">↓</button>
-        </div>
-
-        <!-- Écran d'accueil -->
-        <div id="menuScreen" class="overlay">
-            <div class="menu-screen">
+        <div id="score">Score: 0</div>
+        
+        <div id="startScreen">
+            <div>
                 <div class="title">SERPENT TV</div>
-                <div class="subtitle">Jeu de serpent pour télécommande</div>
-                <div class="instructions">
-                    🎮 Télécommande : Touches directionnelles + OK<br>
-                    🔴 Alternative : Touche Rouge + Flèches<br>
-                    📱 Secours : Boutons tactiles à l'écran<br><br>
-                    🍎 Mangez la nourriture pour grandir et gagner des points<br>
-                    ⚠️ Évitez les murs et votre propre corps
-                </div>
-                <div class="start-prompt">Appuyez sur OK pour commencer</div>
+                <div class="instruction">Utilisez les flèches directionnelles</div>
+                <div class="instruction">Mangez les points blancs</div>
+                <div class="instruction blink">Appuyez sur une flèche pour commencer</div>
             </div>
         </div>
 
-        <!-- Écran Game Over -->
-        <div id="gameOverScreen" class="overlay" style="display: none;">
-            <div class="game-over-screen">
-                <div class="game-over-title">GAME OVER</div>
-                <div class="final-score">Score final: <span id="finalScore">0</span></div>
-                <div class="restart-prompt">Appuyez sur OK pour rejouer</div>
+        <div id="gameOverScreen">
+            <div>
+                <div class="title" style="color: #ff4444;">GAME OVER</div>
+                <div class="instruction">Score: <span id="finalScore">0</span></div>
+                <div class="instruction blink">Appuyez sur une flèche pour rejouer</div>
             </div>
         </div>
 
-        <!-- Écran Pause -->
-        <div id="pauseScreen" class="overlay pause-overlay" style="display: none;">
-            <div class="pause-screen">
-                <div class="pause-title">PAUSE</div>
-                <div class="restart-prompt">Appuyez sur OK pour continuer</div>
+        <div class="controls">
+            <div class="control-row">
+                <button class="control-btn" onclick="moveUp()">↑</button>
+            </div>
+            <div class="control-row">
+                <button class="control-btn" onclick="moveLeft()">←</button>
+                <button class="control-btn" onclick="startGame()" style="width: 80px;">START</button>
+                <button class="control-btn" onclick="moveRight()">→</button>
+            </div>
+            <div class="control-row">
+                <button class="control-btn" onclick="moveDown()">↓</button>
             </div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const levelElement = document.getElementById('level');
-        const finalScoreElement = document.getElementById('finalScore');
-        
-        // Écrans
-        const menuScreen = document.getElementById('menuScreen');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const pauseScreen = document.getElementById('pauseScreen');
-        const gameHUD = document.getElementById('gameHUD');
+        // Variables globales (compatible ancien JavaScript)
+        var canvas = document.getElementById('gameCanvas');
+        var ctx = canvas.getContext('2d');
+        var scoreElement = document.getElementById('score');
+        var startScreen = document.getElementById('startScreen');
+        var gameOverScreen = document.getElementById('gameOverScreen');
+        var finalScoreElement = document.getElementById('finalScore');
 
-        // Configuration du jeu
-        const TILE_SIZE = 50;
-        let GRID_WIDTH;
-        let GRID_HEIGHT;
+        var TILE_SIZE = 50;
+        var GRID_WIDTH;
+        var GRID_HEIGHT;
 
-        // États du jeu
-        const GAME_STATES = {
-            MENU: 'menu',
-            PLAYING: 'playing',
-            GAME_OVER: 'gameover',
-            PAUSED: 'paused'
-        };
+        var snake = [];
+        var direction = {x: 1, y: 0};
+        var food = {x: 5, y: 5};
+        var score = 0;
+        var gameRunning = false;
+        var gameStarted = false;
+        var gameLoop;
 
-        // Variables du jeu
-        let gameState = GAME_STATES.MENU;
-        let snake = [];
-        let direction = { x: 1, y: 0 };
-        let nextDirection = { x: 1, y: 0 };
-        let food = {};
-        let score = 0;
-        let level = 1;
-        let gameSpeed = 250;
-        let gameLoop;
-
-        // Fonction pour ajuster la taille du canvas
-        function resizeCanvas() {
+        // Fonction pour ajuster la taille
+        function setupCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            
             GRID_WIDTH = Math.floor(canvas.width / TILE_SIZE);
             GRID_HEIGHT = Math.floor(canvas.height / TILE_SIZE);
         }
 
-        // Fonction pour initialiser le jeu
-        function initGame() {
-            resizeCanvas();
-            const centerX = Math.floor(GRID_WIDTH / 2);
-            const centerY = Math.floor(GRID_HEIGHT / 2);
+        // Fonction pour initialiser le serpent
+        function initSnake() {
+            var centerX = Math.floor(GRID_WIDTH / 2);
+            var centerY = Math.floor(GRID_HEIGHT / 2);
             snake = [
-                { x: centerX, y: centerY },
-                { x: centerX - 1, y: centerY },
-                { x: centerX - 2, y: centerY }
+                {x: centerX, y: centerY},
+                {x: centerX - 1, y: centerY},
+                {x: centerX - 2, y: centerY}
             ];
-            direction = { x: 1, y: 0 };
-            nextDirection = { x: 1, y: 0 };
-            score = 0;
-            level = 1;
-            gameSpeed = 250;
-            scoreElement.textContent = score;
-            levelElement.textContent = level;
-            generateFood();
         }
 
-        // Fonction pour dessiner un rectangle avec effet 3D
-        function drawRect(x, y, color) {
-            const pixelX = x * TILE_SIZE;
-            const pixelY = y * TILE_SIZE;
-            
+        // Fonction pour dessiner un carré
+        function drawSquare(x, y, color) {
             ctx.fillStyle = color;
-            ctx.fillRect(pixelX, pixelY, TILE_SIZE, TILE_SIZE);
-            
-            // Effet de bordure pour plus de profondeur
-            ctx.strokeStyle = color === '#fff' ? '#ccc' : '#888';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(pixelX + 1, pixelY + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+            ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         }
 
-        // Fonction pour générer une nouvelle position de nourriture
+        // Fonction pour générer la nourriture
         function generateFood() {
-            do {
+            var validPosition = false;
+            while (!validPosition) {
                 food.x = Math.floor(Math.random() * GRID_WIDTH);
                 food.y = Math.floor(Math.random() * GRID_HEIGHT);
-            } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+                
+                validPosition = true;
+                for (var i = 0; i < snake.length; i++) {
+                    if (snake[i].x === food.x && snake[i].y === food.y) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+            }
         }
 
         // Fonction pour dessiner le jeu
         function draw() {
-            // Effacer le canvas
+            // Effacer l'écran
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Dessiner le serpent
-            snake.forEach((segment, index) => {
-                if (index === 0) {
-                    // Tête du serpent
-                    drawRect(segment.x, segment.y, '#fff');
+            for (var i = 0; i < snake.length; i++) {
+                if (i === 0) {
+                    drawSquare(snake[i].x, snake[i].y, '#fff'); // Tête
                 } else {
-                    // Corps du serpent avec dégradé
-                    const alpha = Math.max(0.4, 1 - (index * 0.05));
-                    const grayValue = Math.floor(255 * alpha);
-                    drawRect(segment.x, segment.y, `rgb(${grayValue},${grayValue},${grayValue})`);
+                    drawSquare(snake[i].x, snake[i].y, '#ccc'); // Corps
                 }
-            });
+            }
 
-            // Dessiner la nourriture avec effet de pulsation
-            const time = Date.now();
-            const pulse = Math.sin(time / 200) * 0.3 + 0.7;
-            const brightness = Math.floor(255 * pulse);
-            drawRect(food.x, food.y, `rgb(${brightness},${brightness},${brightness})`);
+            // Dessiner la nourriture
+            drawSquare(food.x, food.y, '#fff');
         }
 
         // Fonction pour mettre à jour le jeu
         function update() {
-            if (gameState !== GAME_STATES.PLAYING) return;
+            if (!gameRunning) return;
 
-            // Appliquer la direction suivante
-            direction = { ...nextDirection };
-
-            // Calculer la nouvelle position de la tête
-            const head = { ...snake[0] };
-            head.x += direction.x;
-            head.y += direction.y;
+            // Nouvelle position de la tête
+            var head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
 
             // Vérifier les collisions avec les murs
             if (head.x < 0 || head.x >= GRID_WIDTH || head.y < 0 || head.y >= GRID_HEIGHT) {
@@ -405,172 +245,148 @@
             }
 
             // Vérifier les collisions avec le corps
-            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-                gameOver();
-                return;
+            for (var i = 0; i < snake.length; i++) {
+                if (snake[i].x === head.x && snake[i].y === head.y) {
+                    gameOver();
+                    return;
+                }
             }
 
+            // Ajouter la nouvelle tête
             snake.unshift(head);
 
-            // Vérifier si le serpent mange la nourriture
+            // Vérifier si le serpent mange
             if (head.x === food.x && head.y === food.y) {
                 score += 10;
-                scoreElement.textContent = score;
-                
-                // Augmenter le niveau et la vitesse
-                const newLevel = Math.floor(score / 100) + 1;
-                if (newLevel > level) {
-                    level = newLevel;
-                    levelElement.textContent = level;
-                    gameSpeed = Math.max(100, 250 - (level * 15));
-                    startGameLoop();
-                }
-                
+                scoreElement.innerHTML = 'Score: ' + score;
                 generateFood();
             } else {
                 snake.pop();
             }
         }
 
-        // Fonction de game over
+        // Fonction pour démarrer le jeu
+        function startGame() {
+            gameRunning = true;
+            gameStarted = true;
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            
+            setupCanvas();
+            initSnake();
+            generateFood();
+            score = 0;
+            scoreElement.innerHTML = 'Score: 0';
+            
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(function() {
+                update();
+                draw();
+            }, 200);
+        }
+
+        // Fonction game over
         function gameOver() {
-            gameState = GAME_STATES.GAME_OVER;
+            gameRunning = false;
             clearInterval(gameLoop);
-            finalScoreElement.textContent = score;
-            gameHUD.style.display = 'none';
+            finalScoreElement.innerHTML = score;
             gameOverScreen.style.display = 'flex';
         }
 
-        // Fonction pour démarrer le jeu
-        function startGame() {
-            gameState = GAME_STATES.PLAYING;
-            menuScreen.style.display = 'none';
-            gameOverScreen.style.display = 'none';
-            pauseScreen.style.display = 'none';
-            gameHUD.style.display = 'block';
-            initGame();
-            startGameLoop();
-        }
-
-        // Fonction pour démarrer la boucle de jeu
-        function startGameLoop() {
-            clearInterval(gameLoop);
-            gameLoop = setInterval(() => {
-                update();
-                draw();
-            }, gameSpeed);
-        }
-
-        // Fonction pour mettre en pause
-        function togglePause() {
-            if (gameState === GAME_STATES.PLAYING) {
-                gameState = GAME_STATES.PAUSED;
-                clearInterval(gameLoop);
-                pauseScreen.style.display = 'flex';
-            } else if (gameState === GAME_STATES.PAUSED) {
-                gameState = GAME_STATES.PLAYING;
-                pauseScreen.style.display = 'none';
-                startGameLoop();
+        // Fonctions de mouvement
+        function moveUp() {
+            if (!gameStarted) {
+                startGame();
+                return;
+            }
+            if (gameRunning && direction.y === 0) {
+                direction = {x: 0, y: -1};
+            }
+            if (!gameRunning && gameStarted) {
+                startGame();
             }
         }
 
-        // Gestionnaire des touches (télécommande Samsung TV + standard)
-        document.addEventListener('keydown', (e) => {
-            console.log('Touche pressée:', e.key, 'Code:', e.keyCode, 'Which:', e.which);
-            
-            const keyCode = e.keyCode || e.which;
-            const key = e.key;
+        function moveDown() {
+            if (!gameStarted) {
+                startGame();
+                return;
+            }
+            if (gameRunning && direction.y === 0) {
+                direction = {x: 0, y: 1};
+            }
+            if (!gameRunning && gameStarted) {
+                startGame();
+            }
+        }
 
-            // Touches OK/Enter (Samsung TV: 13, 32, ou codes spéciaux)
-            const isOKButton = key === 'Enter' || key === ' ' || keyCode === 13 || keyCode === 32 || 
-                              keyCode === 29443 || keyCode === 65385 || key === 'ColorF0Red';
+        function moveLeft() {
+            if (!gameStarted) {
+                startGame();
+                return;
+            }
+            if (gameRunning && direction.x === 0) {
+                direction = {x: -1, y: 0};
+            }
+            if (!gameRunning && gameStarted) {
+                startGame();
+            }
+        }
+
+        function moveRight() {
+            if (!gameStarted) {
+                startGame();
+                return;
+            }
+            if (gameRunning && direction.x === 0) {
+                direction = {x: 1, y: 0};
+            }
+            if (!gameRunning && gameStarted) {
+                startGame();
+            }
+        }
+
+        // Gestionnaire de touches (méthode ancienne)
+        document.onkeydown = function(e) {
+            var keyCode = e.keyCode || e.which;
             
-            if (isOKButton) {
-                e.preventDefault();
-                if (gameState === GAME_STATES.MENU) {
+            // Flèche haut
+            if (keyCode === 38) {
+                moveUp();
+                return false;
+            }
+            // Flèche bas
+            if (keyCode === 40) {
+                moveDown();
+                return false;
+            }
+            // Flèche gauche
+            if (keyCode === 37) {
+                moveLeft();
+                return false;
+            }
+            // Flèche droite
+            if (keyCode === 39) {
+                moveRight();
+                return false;
+            }
+            // Entrée ou espace
+            if (keyCode === 13 || keyCode === 32) {
+                if (!gameStarted || !gameRunning) {
                     startGame();
-                } else if (gameState === GAME_STATES.GAME_OVER) {
-                    gameState = GAME_STATES.MENU;
-                    gameOverScreen.style.display = 'none';
-                    menuScreen.style.display = 'flex';
-                } else if (gameState === GAME_STATES.PAUSED) {
-                    togglePause();
                 }
-                return;
+                return false;
             }
-
-            // Touche BACK/Return (Samsung TV: différents codes)
-            const isBackButton = key === 'Escape' || key === 'Backspace' || keyCode === 27 || 
-                                keyCode === 8 || keyCode === 10009 || key === 'XF86Back';
-            
-            if (isBackButton) {
-                e.preventDefault();
-                if (gameState === GAME_STATES.PLAYING || gameState === GAME_STATES.PAUSED) {
-                    togglePause();
-                }
-                return;
-            }
-
-            // Touches directionnelles (seulement pendant le jeu)
-            if (gameState !== GAME_STATES.PLAYING) return;
-
-            let newDirection = null;
-
-            // Touches directionnelles avec codes Samsung TV
-            if (key === 'ArrowUp' || keyCode === 38 || keyCode === 29460) {
-                if (direction.y === 0) {
-                    newDirection = { x: 0, y: -1 };
-                }
-            } else if (key === 'ArrowDown' || keyCode === 40 || keyCode === 29461) {
-                if (direction.y === 0) {
-                    newDirection = { x: 0, y: 1 };
-                }
-            } else if (key === 'ArrowLeft' || keyCode === 37 || keyCode === 4) {
-                if (direction.x === 0) {
-                    newDirection = { x: -1, y: 0 };
-                }
-            } else if (key === 'ArrowRight' || keyCode === 39 || keyCode === 5) {
-                if (direction.x === 0) {
-                    newDirection = { x: 1, y: 0 };
-                }
-            }
-
-            if (newDirection) {
-                e.preventDefault();
-                nextDirection = newDirection;
-            }
-        });
-
-        // Support des touches alternatives pour Samsung TV
-        document.addEventListener('keyup', (e) => {
-            const keyCode = e.keyCode || e.which;
-            
-            // Codes spéciaux Samsung pour les touches colorées comme alternatives
-            if (gameState === GAME_STATES.MENU || gameState === GAME_STATES.GAME_OVER) {
-                // Touche rouge comme OK alternatif
-                if (keyCode === 403 || e.key === 'ColorF0Red') {
-                    e.preventDefault();
-                    if (gameState === GAME_STATES.MENU) {
-                        startGame();
-                    } else if (gameState === GAME_STATES.GAME_OVER) {
-                        gameState = GAME_STATES.MENU;
-                        gameOverScreen.style.display = 'none';
-                        menuScreen.style.display = 'flex';
-                    }
-                }
-            }
-        });
+        };
 
         // Gestionnaire de redimensionnement
-        window.addEventListener('resize', () => {
-            if (gameState === GAME_STATES.PLAYING) {
-                resizeCanvas();
-                generateFood();
-            }
-        });
+        window.onresize = function() {
+            setupCanvas();
+            draw();
+        };
 
         // Initialisation
-        resizeCanvas();
+        setupCanvas();
         draw();
     </script>
 </body>
