@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>SVG qui rebondit</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      background-color: black;
+    }
+
+    #svg-container {
+      position: absolute;
+      width: 450px;
+      height: 360px;
+    }
+
+    #svg-container img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="svg-container">
+    <img src="logo-baytv.svg" alt="Logo BAYTV">
+  </div>
+
+  <script>
+    const svgContainer = document.getElementById("svg-container");
+
+    let posX = 100;
+    let posY = 100;
+    let vitesseX = 2;
+    let vitesseY = 2;
+
+    function getWindowDimensions() {
+      return {
+        width: window.innerWidth,
+        height: window.innerHeight
+      };
+    }
+
+    function deplacerSVG() {
+      const { width, height } = getWindowDimensions();
+
+      posX += vitesseX;
+      posY += vitesseY;
+
+      if (posX + 450 >= width || posX <= 0) {
+        vitesseX = -vitesseX;
+      }
+
+      if (posY + 360 >= height || posY <= 0) {
+        vitesseY = -vitesseY;
+      }
+
+      svgContainer.style.left = posX + "px";
+      svgContainer.style.top = posY + "px";
+
+      requestAnimationFrame(deplacerSVG);
+    }
+
+    window.onload = () => {
+      deplacerSVG();
+    };
+  </script>
+</body>
+</html>
